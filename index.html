@@ -46,17 +46,28 @@
       opacity: 0;
     }
 
-    .step-icon {
-      position: absolute;
-      top: 0%;
-      left: 50%;
-      transform: translate(-50%, 0%);
-      width: 60px;
-      height: 60px;
-      background: #FE9708;
-      border-radius: 50%;
-      z-index: 1;
-    }
+.step-icon {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #FE9708, #FE9708 70%);
+  z-index: 1;
+  transition: all 0.4s ease;
+}
+
+.step-icon.glow {
+  background: radial-gradient(circle at 30% 30%, #FFD700, #FE9708 70%);
+  box-shadow:
+    0 0 20px 5px rgba(255, 151, 8, 0.5),
+    0 0 40px 10px rgba(255, 151, 8, 0.4),
+    0 0 80px 20px rgba(255, 151, 8, 0.3);
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
   </style>
 </head>
 <body>
@@ -98,7 +109,7 @@
 <script>
   gsap.registerPlugin(ScrollTrigger);
 
-  const overlays = gsap.utils.toArray('.overlay');
+  const overlays = gsap.utils.toArray('.overlay').reverse(); // ← this is the key fix!
   const stepIcon = document.querySelector('.step-icon');
   const smallestCircle = document.querySelector('.overlay-4');
 
@@ -133,16 +144,34 @@ window.addEventListener('load', () => {
 
   // Step 2: Fade in/out overlays smoothly
   // Step 2: Smooth overlapping fade transitions
-  tl.to(overlays[3], { opacity: 1, duration: 1, ease: "power1.inOut" }, "ball-settled")
-    .to(overlays[3], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2") // overlaps
+tl.to(overlays[0], { // overlay-1: outermost
+  opacity: 1, duration: 1, ease: "power1.inOut"
+}, "ball-settled")
+.to(overlays[0], {
+  opacity: 0, duration: 1, ease: "power1.inOut"
+}, "-=0.2")
 
-    .to(overlays[2], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3")
-    .to(overlays[2], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2")
+.to(overlays[1], { // overlay-2
+  opacity: 1, duration: 1, ease: "power1.inOut"
+}, "-=0.3")
+.to(overlays[1], {
+  opacity: 0, duration: 1, ease: "power1.inOut"
+}, "-=0.2")
 
-    .to(overlays[1], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3")
-    .to(overlays[1], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2")
+.to(overlays[2], { // overlay-3
+  opacity: 1, duration: 1, ease: "power1.inOut"
+}, "-=0.3")
+.to(overlays[2], {
+  opacity: 0, duration: 1, ease: "power1.inOut"
+}, "-=0.2")
 
-    .to(overlays[0], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3");
+.to(overlays[3], { // overlay-4: innermost
+  opacity: 1,
+  duration: 1,
+  ease: "power1.inOut",
+  onStart: () => stepIcon.classList.add("glow"),
+  onReverseComplete: () => stepIcon.classList.remove("glow") // 👈 remove when scrolling back up
+}, "-=0.3");
 
 });
 
