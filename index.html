@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scroll-triggered Concentric Circles</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      font-family: sans-serif;
+    }
+
+    .step-section {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .circle-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    svg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60vmin;
+      height: 60vmin;
+    }
+
+    circle.base {
+      stroke: #333;
+      fill: none;
+      stroke-width: 1;
+    }
+
+    circle.overlay {
+      stroke: url(#paint1);
+      fill: none;
+      stroke-width: 1;
+      opacity: 0;
+    }
+
+    .step-icon {
+      position: absolute;
+      top: 0%;
+      left: 50%;
+      transform: translate(-50%, 0%);
+      width: 50px;
+      height: 50px;
+      background: #FE9708;
+      border-radius: 50%;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<section class="step-section">
+  <div class="circle-container">
+    <div class="step-icon"></div>
+
+    <svg viewBox="0 0 400 400">
+      <defs>
+        <linearGradient id="paint1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#F2F2F2" />
+          <stop offset="100%" stop-color="#FE9708" />
+        </linearGradient>
+      </defs>
+
+      <!-- 4th (smallest) circle -->
+      <circle class="base" cx="200" cy="50" r="50" />
+      <circle class="overlay overlay-4" cx="200" cy="50" r="50" />
+
+      <!-- 3rd -->
+      <circle class="base" cx="200" cy="90" r="90" />
+      <circle class="overlay overlay-3" cx="200" cy="90" r="90" />
+
+      <!-- 2nd -->
+      <circle class="base" cx="200" cy="140" r="140" />
+      <circle class="overlay overlay-2" cx="200" cy="140" r="140" />
+
+      <!-- 1st (largest) -->
+      <circle class="base" cx="200" cy="190" r="190" />
+      <circle class="overlay overlay-1" cx="200" cy="190" r="190" />
+    </svg>
+  </div>
+</section>
+
+<!-- GSAP & ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  const overlays = gsap.utils.toArray('.overlay');
+  const stepIcon = document.querySelector('.step-icon');
+  const smallestCircle = document.querySelector('.overlay-4');
+
+  window.addEventListener('load', () => {
+    // Get the center position of the smallest circle in screen coordinates
+    const bbox = smallestCircle.getBoundingClientRect();
+    const circleCenterY = bbox.top + bbox.height / 2;
+
+    // Get the step-icon's current Y position
+    const iconBox = stepIcon.getBoundingClientRect();
+    const iconStartY = iconBox.top + iconBox.height / 2;
+
+    // Difference to move the icon so it lands in the circle center
+    const deltaY = circleCenterY - iconStartY;
+
+    // Animate with GSAP timeline
+    let tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.step-section',
+        start: 'top top',
+        end: '+=200%',
+        scrub: true,
+        pin: true,
+        markers: true // Remove for production
+      }
+    });
+
+    tl.to(stepIcon, {
+      y: deltaY,
+      duration: 1,
+      ease: 'power2.out'
+    });
+
+    tl.add("ball-settled");
+
+    tl.to(overlays[3], { opacity: 1, duration: 1 }, "ball-settled+=0.2")
+      .to(overlays[2], { opacity: 1, duration: 1 }, "+=0.2")
+      .to(overlays[1], { opacity: 1, duration: 1 }, "+=0.2")
+      .to(overlays[0], { opacity: 1, duration: 1 }, "+=0.2");
+  });
+</script>
+
+
+</body>
+</html>
