@@ -51,8 +51,8 @@
       top: 0%;
       left: 50%;
       transform: translate(-50%, 0%);
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       background: #FE9708;
       border-radius: 50%;
       z-index: 1;
@@ -102,43 +102,50 @@
   const stepIcon = document.querySelector('.step-icon');
   const smallestCircle = document.querySelector('.overlay-4');
 
-  window.addEventListener('load', () => {
-    // Get the center position of the smallest circle in screen coordinates
-    const bbox = smallestCircle.getBoundingClientRect();
-    const circleCenterY = bbox.top + bbox.height / 2;
+window.addEventListener('load', () => {
+  const bbox = smallestCircle.getBoundingClientRect();
+  const circleCenterY = bbox.top + bbox.height / 2;
 
-    // Get the step-icon's current Y position
-    const iconBox = stepIcon.getBoundingClientRect();
-    const iconStartY = iconBox.top + iconBox.height / 2;
+  const iconBox = stepIcon.getBoundingClientRect();
+  const iconStartY = iconBox.top + iconBox.height / 2;
 
-    // Difference to move the icon so it lands in the circle center
-    const deltaY = circleCenterY - iconStartY;
+  const deltaY = circleCenterY - iconStartY;
 
-    // Animate with GSAP timeline
-    let tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: '.step-section',
-        start: 'top top',
-        end: '+=200%',
-        scrub: true,
-        pin: true,
-        markers: true // Remove for production
-      }
-    });
-
-    tl.to(stepIcon, {
-      y: deltaY,
-      duration: 1,
-      ease: 'power2.out'
-    });
-
-    tl.add("ball-settled");
-
-    tl.to(overlays[3], { opacity: 1, duration: 1 }, "ball-settled+=0.2")
-      .to(overlays[2], { opacity: 1, duration: 1 }, "+=0.2")
-      .to(overlays[1], { opacity: 1, duration: 1 }, "+=0.2")
-      .to(overlays[0], { opacity: 1, duration: 1 }, "+=0.2");
+  let tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: '.step-section',
+      start: 'top top',
+      end: '+=300%',
+      scrub: true,
+      pin: true,
+      anticipatePin: 1
+    }
   });
+
+  // Step 1: Drop the step icon
+  tl.to(stepIcon, {
+    y: deltaY,
+    duration: 1,
+    ease: 'power2.out'
+  });
+
+  tl.add("ball-settled");
+
+  // Step 2: Fade in/out overlays smoothly
+  // Step 2: Smooth overlapping fade transitions
+  tl.to(overlays[3], { opacity: 1, duration: 1, ease: "power1.inOut" }, "ball-settled")
+    .to(overlays[3], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2") // overlaps
+
+    .to(overlays[2], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3")
+    .to(overlays[2], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2")
+
+    .to(overlays[1], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3")
+    .to(overlays[1], { opacity: 0, duration: 1, ease: "power1.inOut" }, "-=0.2")
+
+    .to(overlays[0], { opacity: 1, duration: 1, ease: "power1.inOut" }, "-=0.3");
+
+});
+
 </script>
 
 
